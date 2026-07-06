@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  accountant-agent:
+    build: .
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
+    restart: unless-stopped

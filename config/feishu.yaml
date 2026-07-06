@@ -1,0 +1,7 @@
+feishu:
+  app_id: "cli_xxxxxxxxxxxx"
+  app_secret: "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+  verification_token: "xxxxxxxxxxxxxxxx"
+  encrypt_key: ""
+  # 私有云/专有云部署时可自定义飞书 API 地址，默认走公网
+  api_base: "https://open.feishu.cn"

@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DE 会计数字员工 - 工作台</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --sidebar-bg: rgba(15, 22, 42, 0.7);
+            --chat-bg: rgba(20, 30, 55, 0.4);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #4f46e5;
+            --primary-glow: rgba(79, 70, 229, 0.3);
+            --accent: #06b6d4;
+            --accent-glow: rgba(6, 182, 212, 0.3);
+            --system-msg-bg: rgba(30, 41, 59, 0.5);
+            --user-msg-bg: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+            --bot-msg-bg: rgba(30, 41, 59, 0.8);
+            --danger: #ef4444;
+            --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            z-index: 10;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 20px;
+            color: #fff;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        .logo-text {
+            font-weight: 600;
+            font-size: 18px;
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .info-section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        .info-card strong {
+            color: var(--text-main);
+        }
+
+        .format-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 11px;
+            color: var(--text-main);
+            margin: 4px 4px 4px 0;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
+        }
+
+        /* Chat container */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background-color: var(--chat-bg);
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-header {
+            height: 70px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            background: rgba(11, 15, 25, 0.3);
+        }
+
+        .chat-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .message {
+            max-width: 80%;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            align-self: flex-end;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+        }
+
+        .message-bubble {
+            padding: 14px 18px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .message.user .message-bubble {
+            background: var(--user-msg-bg);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2);
+        }
+
+        .message.bot .message-bubble {
+            background: var(--bot-msg-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .message.user .message-meta {
+            align-self: flex-end;
+        }
+
+        .message.bot .message-meta {
+            align-self: flex-start;
+        }
+
+        /* Tables and text formatting inside response */
+        .message-bubble table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 12px 0;
+            font-size: 13px;
+        }
+
+        .message-bubble th, .message-bubble td {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        .message-bubble th {
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 600;
+        }
+
+        .message-bubble code {
+            font-family: 'Courier New', Courier, monospace;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .message-bubble pre {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .message-bubble pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .message-bubble p {
+            margin-bottom: 8px;
+        }
+        .message-bubble p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Input Area & File Uploading */
+        .chat-input-area {
+            padding: 24px 32px 32px 32px;
+            background: rgba(11, 15, 25, 0.4);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Selected file preview bar */
+        .file-preview-bar {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            max-width: fit-content;
+        }
+
+        .file-preview-icon {
+            color: var(--accent);
+        }
+
+        .file-preview-name {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .file-preview-remove {
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .file-preview-remove:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--danger);
+        }
+
+        .input-box-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 8px 16px;
+            transition: all 0.3s ease;
+        }
+
+        .input-box-wrapper:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Upload Clip Button */
+        .upload-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 8px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            margin-right: 10px;
+        }
+
+        .upload-btn:hover {
+            color: var(--accent);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #fff;
+            font-family: inherit;
+            font-size: 14px;
+            padding: 10px 0;
+            outline: none;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 10px 20px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+            margin-left: 12px;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 5px;
+            padding: 6px 0;
+            align-items: center;
+        }
+
+        .typing-dot {
+            width: 7px;
+            height: 7px;
+            background-color: var(--text-muted);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+
+        .clear-history-btn {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .clear-history-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #f87171;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hidden input fields for developer overrides (can still be accessed via DOM if needed, but clean for user) -->
+    <input type="hidden" id="userIdInput" value="user_web_test_01">
+    <input type="hidden" id="adminIdInput" value="ou_admin_open_id_here">
+    <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(event)">
+
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+        <div class="logo-area">
+            <div class="logo-icon">DE</div>
+            <div class="logo-text">会计数字员工</div>
+        </div>
+
+        <div class="info-section">
+            <div class="section-title">智能助理说明</div>
+            <div class="info-card">
+                <p>我是专为企业设计的<b>智能财务对账助理</b>。</p>
+                <p style="margin-top: 10px;">您可以向我咨询财务指标计算，或者直接<b>上传账单报表</b>，我将为您自动完成表格数据提取、归纳汇总与对账分析。</p>
+            </div>
+        </div>
+
+        <div class="info-section" style="flex: 1;">
+            <div class="section-title">支持分析文件格式</div>
+            <div>
+                <span class="format-badge">Excel (.xlsx)</span>
+                <span class="format-badge">Excel (.xls)</span>
+                <span class="format-badge">CSV 报表</span>
+                <span class="format-badge">PDF 电子账单</span>
+                <span class="format-badge">TXT 文本</span>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="section-title">运行状态</div>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                <span>数字员工在线</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chat Area -->
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="chat-title">智能财务对账终端</div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button class="clear-history-btn" onclick="clearChatHistory()" title="清空当前会话记忆">🗑️ 清空历史</button>
+                <div style="font-size: 13px; color: var(--text-muted);">v0.2.4 Production</div>
+            </div>
+        </div>
+
+        <!-- Chat history area -->
+        <div class="chat-messages" id="chatHistory">
+            <!-- Welcome message -->
+            <div class="message bot">
+                <div class="message-bubble">
+                    <p>👋 您好！我是您的<b>会计数字员工</b>。很高兴为您服务。</p>
+                    <p>您可以直接向我提问财务相关的问题，或者点击输入框左侧的 📎 按钮上传报表文件让我帮您分析！</p>
+                </div>
+                <div class="message-meta">系统消息 • 刚刚</div>
+            </div>
+        </div>
+
+        <!-- Input Box & Upload Info area -->
+        <div class="chat-input-area">
+            <!-- Selected file indicator -->
+            <div class="file-preview-bar" id="filePreviewBar">
+                <span class="file-preview-icon">📄</span>
+                <span class="file-preview-name" id="filePreviewName">filename.xlsx</span>
+                <span class="file-preview-remove" onclick="clearFileSelect()">&times;</span>
+            </div>
+
+            <div class="input-box-wrapper">
+                <!-- Trigger hidden file input -->
+                <button class="upload-btn" title="上传 Excel/CSV/PDF 等对账文件" onclick="document.getElementById('fileInput').click()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                    </svg>
+                </button>
+                <input type="text" class="chat-input" id="chatInput" placeholder="在此输入您的咨询问题，或者直接上传 Excel/PDF 进行分析..." onkeydown="handleKeyDown(event)">
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatHistory = document.getElementById('chatHistory');
+        const chatInput = document.getElementById('chatInput');
+        const fileInput = document.getElementById('fileInput');
+        const filePreviewBar = document.getElementById('filePreviewBar');
+        const filePreviewName = document.getElementById('filePreviewName');
+        const userIdInput = document.getElementById('userIdInput');
+        const adminIdInput = document.getElementById('adminIdInput');
+
+        let selectedFile = null;
+
+        // File Selection Handlers
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            selectedFile = file;
+            filePreviewName.innerText = file.name;
+            filePreviewBar.style.display = 'flex';
+        }
+
+        function clearFileSelect() {
+            selectedFile = null;
+            fileInput.value = '';
+            filePreviewBar.style.display = 'none';
+        }
+
+        // Simple Markdown table and code snippet formatter for web view
+        function formatMarkdown(text) {
+            let formatted = text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+
+            // Bold styling
+            formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // Inline code block
+            formatted = formatted.replace(/`(.*?)`/g, '<code>$1</code>');
+
+            // Multi-line code blocks
+            formatted = formatted.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+
+            // Markdown Table conversion
+            const lines = formatted.split('\n');
+            let inTable = false;
+            let tableHTML = '';
+            let rows = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line.startsWith('|') && line.endsWith('|')) {
+                    if (!inTable) {
+                        inTable = true;
+                        rows = [];
+                    }
+                    // Extract cells
+                    const cells = line.split('|').map(c => c.trim()).filter((c, idx, arr) => idx > 0 && idx < arr.length - 1);
+                    rows.push(cells);
+                } else {
+                    if (inTable) {
+                        // Build table HTML
+                        tableHTML = '<table>';
+                        rows.forEach((row, rowIdx) => {
+                            const tag = (rowIdx === 0 || (rowIdx === 1 && row.every(c => c.startsWith('-')))) ? 'th' : 'td';
+                            
+                            // Skip the separator row like |---|---|
+                            if (rowIdx === 1 && row.every(c => c.startsWith('-'))) {
+                                return;
+                            }
+                            
+                            tableHTML += '<tr>';
+                            row.forEach(cell => {
+                                tableHTML += `<${tag}>${cell}</${tag}>`;
+                            });
+                            tableHTML += '</tr>';
+                        });
+                        tableHTML += '</table>';
+                        
+                        // Replace the lines with the table HTML
+                        const tableStartIdx = i - rows.length;
+                        lines.splice(tableStartIdx, rows.length, tableHTML);
+                        i = tableStartIdx; // adjust loop index
+                        inTable = false;
+                    }
+                }
+            }
+            
+            formatted = lines.join('\n');
+            // Line breaks
+            formatted = formatted.replace(/\n/g, '<br>');
+            return formatted;
+        }
+
+        function appendMessage(sender, text, attachmentName = null) {
+            const timeStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            
+            let messageContent = '';
+            if (attachmentName) {
+                messageContent += `<div style="display:inline-flex; align-items:center; gap:6px; background:rgba(0,0,0,0.1); padding:4px 8px; border-radius:6px; margin-bottom:8px; font-size:12px; border:1px solid rgba(255,255,255,0.05);">📎 ${attachmentName}</div><br>`;
+            }
+            messageContent += formatMarkdown(text);
+            bubble.innerHTML = messageContent;
+            
+            const meta = document.createElement('div');
+            meta.className = 'message-meta';
+            meta.innerText = `${sender === 'user' ? '您' : '会计数字员工'} • ${timeStr}`;
+            
+            msgDiv.appendChild(bubble);
+            msgDiv.appendChild(meta);
+            chatHistory.appendChild(msgDiv);
+            
+            // Scroll to bottom
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        function showLoading() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message bot';
+            loadingDiv.id = 'loadingIndicator';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.innerHTML = `
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            
+            loadingDiv.appendChild(bubble);
+            chatHistory.appendChild(loadingDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        function removeLoading() {
+            const indicator = document.getElementById('loadingIndicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        async function sendMessage() {
+            const messageText = chatInput.value.trim();
+            // Allow sending if there is text OR if a file is uploaded
+            if (!messageText && !selectedFile) return;
+
+            const sendText = messageText || "请分析我上传的文件";
+            const attachmentName = selectedFile ? selectedFile.name : null;
+
+            // Clear input box and save file copy
+            chatInput.value = '';
+            const currentFile = selectedFile;
+            clearFileSelect();
+            
+            // Append user message with attachment notice
+            appendMessage('user', sendText, attachmentName);
+            
+            // Display loading dots
+            showLoading();
+
+            const isConfigCommand = sendText.startsWith('/config');
+            const url = isConfigCommand ? '/api/config' : '/api/chat';
+            const userId = isConfigCommand ? adminIdInput.value.trim() : userIdInput.value.trim();
+
+            // Construct Form-Data payload (required for files)
+            const formData = new FormData();
+            formData.append('user_id', userId);
+            
+            if (isConfigCommand) {
+                // Config API expects JSON body since we didn't change it to Form-Data (keep it simple, configs don't upload files anyway)
+                try {
+                    const response = await fetch('/api/config', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            user_id: userId,
+                            message: sendText
+                        })
+                    });
+                    
+                    if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                    const data = await response.json();
+                    removeLoading();
+                    appendMessage('bot', data.result || '⚠️ 无有效返回');
+                } catch (err) {
+                    removeLoading();
+                    appendMessage('bot', `❌ 错误: 无法建立连接 (${err.message})`);
+                }
+                return;
+            }
+
+            // Standard chat with optional file upload
+            formData.append('message', sendText);
+            if (currentFile) {
+                formData.append('file', currentFile);
+            }
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    // Note: Browser sets Content-Type automatically when sending FormData
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`服务器响应失败: ${response.status}`);
+                }
+
+                const data = await response.json();
+                removeLoading();
+                appendMessage('bot', data.reply || '⚠️ 无有效返回内容');
+            } catch (err) {
+                removeLoading();
+                appendMessage('bot', `❌ 错误: 无法与本地服务建立连接。请确认后台启动无误并保持运行。(${err.message})`);
+            }
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        async function clearChatHistory() {
+            if (!confirm("确定要清空与会计数字员工的当前历史对话记录吗？此操作不可逆。")) {
+                return;
+            }
+            const userId = userIdInput.value.trim();
+            try {
+                const response = await fetch(`/api/chat/history?user_id=${encodeURIComponent(userId)}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) {
+                    throw new Error(`请求失败: ${response.status}`);
+                }
+                
+                // Clear the chat bubbles DOM, leaving only the welcome message
+                const messages = chatHistory.querySelectorAll('.message');
+                messages.forEach((msg, idx) => {
+                    if (idx > 0) { // keep first welcome message
+                        msg.remove();
+                    }
+                });
+                
+                // Append system reset success notice
+                const timeStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const sysDiv = document.createElement('div');
+                sysDiv.className = 'message bot';
+                sysDiv.innerHTML = `
+                    <div class="message-bubble" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #a7f3d0;">
+                        🔄 会话记忆已重置清空。大模型已恢复至初始干净状态，您可以重新提问或上传新文件进行分析。
+                    </div>
+                    <div class="message-meta">系统消息 • ${timeStr}</div>
+                `;
+                chatHistory.appendChild(sysDiv);
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+                
+            } catch (err) {
+                alert(`清空失败: ${err.message}`);
+            }
+        }
+    </script>
+</body>
+</html>
