@@ -49,10 +49,11 @@ class Memory:
     def _sync_get_recent(self, user_id: str, n: int, session_id: str) -> list[dict]:
         with sqlite3.connect(str(self.db_path)) as conn:
             conn.row_factory = sqlite3.Row
+            # 按自增 id 排序：created_at 仅有秒级精度，同一秒写入的 user/assistant 消息顺序会乱
             rows = conn.execute(
                 """SELECT role, content FROM conversations
                    WHERE user_id = ? AND session_id = ?
-                   ORDER BY created_at DESC LIMIT ?""",
+                   ORDER BY id DESC LIMIT ?""",
                 (user_id, session_id, n * 2)
             ).fetchall()
         return [{"role": r["role"], "content": r["content"]} for r in reversed(rows)]

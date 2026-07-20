@@ -1,0 +1,23 @@
+# 敏感文件：绝不打进镜像层（.gitignore 对 docker build 无效，必须在此单独声明）
+.env
+.env.*
+!.env.example
+
+# 运行时数据（docker-compose 通过 volume 挂载，无需入镜像）
+data/
+
+# 版本控制与本地环境
+.git/
+.gitignore
+venv/
+ENV/
+env/
+__pycache__/
+*.py[cod]
+*.db
+
+# 本地脚手架与文档
+scratch_generate_excel.py
+README.md
+START.md
+.DS_Store

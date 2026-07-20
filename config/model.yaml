@@ -10,6 +10,16 @@ database:
 soul:
   path: "config/soul.md"
 
+policy:
+  path: "config/policy.yaml"   # 公司财务制度，作为审计判定依据注入 system prompt
+
+# 图片票据 OCR（fapiao-ocr 技能槽）：需 OpenAI 兼容的多模态模型
+# api_key 走环境变量 VISION_API_KEY（或 DASHSCOPE_API_KEY）
+vision:
+  enabled: false               # 配好 key 后改为 true 即启用
+  base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  model: "qwen-vl-plus"
+
 config_history_dir: "data/config_history"
 
 # 管理员 ID 列表，允许配置多个，无硬编码

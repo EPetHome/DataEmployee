@@ -1,7 +1,11 @@
 feishu:
-  app_id: "cli_xxxxxxxxxxxx"
-  app_secret: "xxxxxxxxxxxxxxxxxxxxxxxxxx"
-  verification_token: "xxxxxxxxxxxxxxxx"
+  # 凭据一律通过环境变量配置（.env 中的 FEISHU_APP_ID / FEISHU_APP_SECRET），
+  # 此文件不要填写真实密钥，防止随代码泄露。
+  app_id: ""
+  app_secret: ""
+  # 事件订阅安全校验（飞书开放平台 → 事件订阅 → Verification Token / Encrypt Key）
+  # 同样建议通过环境变量 FEISHU_VERIFICATION_TOKEN / FEISHU_ENCRYPT_KEY 配置
+  verification_token: ""
   encrypt_key: ""
   # 私有云/专有云部署时可自定义飞书 API 地址，默认走公网
   api_base: "https://open.feishu.cn"

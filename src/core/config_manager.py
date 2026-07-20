@@ -125,6 +125,13 @@ class ConfigManager:
         with open(yaml_file, encoding="utf-8") as f:
             config_data = yaml.safe_load(f)
         
+        # LLM 解析出的 value 往往是字符串，尝试还原为 YAML 标量类型（数字/布尔等）
+        if isinstance(value, str):
+            try:
+                value = yaml.safe_load(value)
+            except yaml.YAMLError:
+                pass
+
         if param_path:
             keys = param_path.split(".")
             target = config_data
@@ -162,10 +169,13 @@ class ConfigManager:
     def _rollback_config(self) -> str:
         backup_dir = Path(self.get("model.config_history_dir") or "data/config_history")
         backups = sorted(backup_dir.glob("soul_*.md"), reverse=True)
-        if len(backups) < 2:
+        if not backups:
             return "⚠️ 没有可回滚的历史版本"
-        prev = backups[1]
-        Path(self.get("model.soul.path") or "config/soul.md").write_text(prev.read_text(encoding="utf-8"))
+        # 备份是在每次修改前生成的，backups[0] 即最近一次修改前的内容
+        prev = backups[0]
+        Path(self.get("model.soul.path") or "config/soul.md").write_text(
+            prev.read_text(encoding="utf-8"), encoding="utf-8"
+        )
         return f"✅ 已回滚到: {prev.name}"
 
 config_manager_instance = ConfigManager()

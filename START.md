@@ -50,10 +50,21 @@ DEEPSEEK_API_KEY=sk-your-real-deepseek-api-key
 FEISHU_APP_ID=cli_your_feishu_app_id
 FEISHU_APP_SECRET=your_feishu_app_secret
 
-# 3. 可选覆盖项 (测试时可用，生产环境建议留空走 model.yaml)
+# 3. 飞书事件订阅安全校验 (生产环境强烈建议配置，来源: 开放平台 → 事件与回调 → 加密策略)
+#    配置 Verification Token 后校验事件来源；配置 Encrypt Key 后自动启用签名校验与事件解密
+FEISHU_VERIFICATION_TOKEN=your_verification_token
+FEISHU_ENCRYPT_KEY=your_encrypt_key
+
+# 4. 网页调试台 /api/* 端点的访问令牌。不配置则调试 API 整体禁用（生产环境建议留空）
+DEBUG_API_TOKEN=any-random-secret
+
+# 5. 可选覆盖项 (测试时可用，生产环境建议留空走 model.yaml)
 # DATABASE_PATH=data/conversations.db
 # ADMIN_USER_IDS=ou_admin_1_openid,ou_admin_2_openid
 ```
+
+> ⚠️ **安全提醒**：真实凭据只放 `.env`（已被 `.gitignore`/`.dockerignore` 排除），
+> `config/feishu.yaml` 中一律保持占位符，严禁提交真实密钥。
 
 ### 2. 系统通用配置 (`config/model.yaml`)
 检查并修改基础运行配置：
